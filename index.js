@@ -9,28 +9,82 @@ const connection = mysql.createConnection({
   database: 'testdb'
 })
 
-connection.connect((err) =>{
-  if(err){
-    console.log(err);
-    return;
-  }
-  console.log("Database Created")
-
-  const creationQuery = `create table student(
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  name VARCHAR(20),
-  email VARCHAR(20)
-  )`
-
-  connection.execute(creationQuery, (err) => {
-    if(err){
-      console.log(err);
-      connection.end();
-      return;
+connection.connect((err) => {
+    if (err) {
+        console.log(err);
+        return;
     }
-    console.log("Table is created")
-  })
-})
+
+    console.log("Database Connected");
+
+    const usersQuery = `
+        CREATE TABLE IF NOT EXISTS users (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            name VARCHAR(255),
+            email VARCHAR(255)
+        )
+    `;
+
+    const busesQuery = `
+        CREATE TABLE IF NOT EXISTS buses (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            busNumber VARCHAR(255),
+            totalSeats INT,
+            availableSeats INT
+        )
+    `;
+
+    const bookingsQuery = `
+        CREATE TABLE IF NOT EXISTS bookings (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            seatNumber INT
+        )
+    `;
+
+    const paymentsQuery = `
+        CREATE TABLE IF NOT EXISTS payments (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            amountPaid INT,
+            paymentStatus VARCHAR(255)
+        )
+    `;
+
+    connection.execute(usersQuery, (err) => {
+        if (err) {
+            console.log(err);
+            return;
+        }
+
+        console.log("Users table created");
+
+        connection.execute(busesQuery, (err) => {
+            if (err) {
+                console.log(err);
+                return;
+            }
+
+            console.log("Buses table created");
+
+            connection.execute(bookingsQuery, (err) => {
+                if (err) {
+                    console.log(err);
+                    return;
+                }
+
+                console.log("Bookings table created");
+
+                connection.execute(paymentsQuery, (err) => {
+                    if (err) {
+                        console.log(err);
+                        return;
+                    }
+
+                    console.log("Payments table created");
+                });
+            });
+        });
+    });
+});
 
 app.get('/',(req, res) => {
   res.send('Hello World')
