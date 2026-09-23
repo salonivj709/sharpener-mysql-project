@@ -5,6 +5,8 @@ const studentsRoutes = require('./routes/studentsRoutes');
 const studentRoutes = require('./routes/studentRoutes');
 const busBookingRoutes = require('./routes/busBookingRoutes');
 
+const studentModel = require('./models/students');
+
 const app = express();
 
 // Middleware
@@ -25,7 +27,12 @@ app.use('/students', studentsRoutes);
 // Bus Booking routes
 app.use('/', busBookingRoutes);
 
-// Start server
-app.listen(3000, () => {
+db.sync({force:true}).then((err) => {
+  app.listen(3000, () => {
     console.log('Server is running on port 3000');
 });
+}).catch((err) => {
+  console.log(err);
+})
+
+// Start server
