@@ -1,6 +1,7 @@
 const express = require('express');
 const db = require('./utils/db-connection');
 
+const studentsRoutes = require('./routes/studentsRoutes');
 const studentRoutes = require('./routes/studentRoutes');
 const busBookingRoutes = require('./routes/busBookingRoutes');
 
@@ -15,7 +16,11 @@ app.get('/', (req, res) => {
 });
 
 // Student routes
-app.use('/students', studentRoutes);
+app.use('/student', studentRoutes);
+
+// Students Management
+app.use('/students', studentsRoutes);
+
 
 // Bus Booking routes
 app.use('/', busBookingRoutes);

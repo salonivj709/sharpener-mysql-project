@@ -4,7 +4,7 @@ const connection = mysql.createConnection({
   host: 'localhost',
   user:"root",
   password: 'root123',
-  database: 'bus_booking'
+  database: 'testdb'
 })
 
 connection.connect((err) => {
@@ -15,22 +15,23 @@ connection.connect((err) => {
 
     console.log("Database Connected");
 
-//    const studentsQuery = `
-//     CREATE TABLE IF NOT EXISTS students (
-//         id INT AUTO_INCREMENT PRIMARY KEY,
-//         name VARCHAR(255),
-//         email VARCHAR(255)
-//     )
-// `;
+    const createTableQuery = `
+        CREATE TABLE IF NOT EXISTS students (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            name VARCHAR(255) NOT NULL,
+            email VARCHAR(255) NOT NULL UNIQUE,
+            age INT NOT NULL
+        )
+    `;
 
-//    connection.execute(studentsQuery, (err) => {
-//         if (err) {
-//             console.log(err);
-//             return;
-//         }
+    connection.execute(createTableQuery, (err) => {
+        if (err) {
+            console.log(err.message);
+            return;
+        }
 
-//        console.log("Students table created");
-//     });
+        console.log('Students table ready');
+    });
 });
 
 module.exports = connection;
