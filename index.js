@@ -6,6 +6,10 @@ const studentRoutes = require('./routes/studentRoutes');
 const busBookingRoutes = require('./routes/busBookingRoutes');
 
 const studentModel = require('./models/students');
+const User = require("./models/users");
+const Bus = require("./models/buses");
+const Booking = require("./models/bookings");
+const Payment = require("./models/payments");
 
 const app = express();
 
