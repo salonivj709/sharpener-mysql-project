@@ -4,6 +4,7 @@ const db = require('./utils/db-connection');
 const studentsRoutes = require('./routes/studentsRoutes');
 const studentRoutes = require('./routes/studentRoutes');
 const busBookingRoutes = require('./routes/busBookingRoutes');
+const courseRoutes = require('./routes/courseRoutes');
 
 // const studentModel = require('./models/students');
 // const User = require("./models/users");
@@ -25,6 +26,8 @@ app.get('/', (req, res) => {
 
 // Student routes
 app.use('/student', studentRoutes);
+
+app.use('/course', courseRoutes);
 
 // Students Management
 app.use('/students', studentsRoutes);
