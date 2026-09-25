@@ -7,4 +7,6 @@ router.post('/add', studentController.addEntries);
 router.put('/update/:id', studentController.updatEntry);
 router.delete('/delete/:id',studentController.deleteEntry);
 
+router.post('/addingvalues', studentController.addingvalues);
+
 module.exports = router;
