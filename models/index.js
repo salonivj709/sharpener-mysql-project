@@ -20,6 +20,24 @@ Students.belongsTo(department);
 Students.belongsToMany(courses, { through: studentCourses });
 courses.belongsToMany(Students, { through: studentCourses });
 
+//bus-booking association
+
+Users.hasMany(Booking, {
+    foreignKey: 'user_id'
+});
+
+Booking.belongsTo(Users, {
+    foreignKey: 'user_id'
+});
+
+Bus.hasMany(Booking, {
+    foreignKey: 'bus_id'
+});
+
+Booking.belongsTo(Bus, {
+    foreignKey: 'bus_id'
+});
+
 module.exports = {
     Students,
     Users,

@@ -1,17 +1,23 @@
-const db = require('../utils/db-connection');
-const { User, Bus } = require("../models");
+const db = require("../utils/db-connection");
 
-// Add User
+const {
+    Users,
+    Bus,
+    Booking
+} = require("../models");
+
+// ===============================
+// ADD USER
+// ===============================
+
 const addUser = async (req, res) => {
     try {
         const { name, email } = req.body;
 
-        const user = await User.create({
+        const user = await Users.create({
             name,
             email
         });
-
-        console.log("User inserted successfully");
 
         res.status(201).send({
             message: "User added successfully",
@@ -29,62 +35,34 @@ const addUser = async (req, res) => {
 };
 
 
-    // const query = `
-    //     INSERT INTO users (name, email)
-    //     VALUES (?, ?)
-    // `;
+// ===============================
+// GET ALL USERS
+// ===============================
 
-    // db.execute(query, [name, email], (err, result) => {
-    //     if (err) {
-    //         console.log(err.message);
-    //         return res.status(500).send(err.message);
-    //     }
-
-    //     console.log('User inserted successfully');
-
-    //     res.status(201).send({
-    //         message: 'User added successfully',
-    //         id: result.insertId
-    //     });
-    // });
-
-
-
-// Get All Users
 const getUsers = async (req, res) => {
     try {
 
-        const users = await User.findAll();
+        const users = await Users.findAll();
 
-        console.log("Users retrieved successfully");
-
-        res.status(200).send(users);
+        res.status(200).send({
+            message: "Users fetched successfully",
+            data: users
+        });
 
     } catch (err) {
-        console.log(err.message);
 
         res.status(500).send({
-            message: "Error retrieving users",
+            message: "Error fetching users",
             error: err.message
         });
+
     }
 };
-    // const query = 'SELECT * FROM users';
-
-    // db.execute(query, (err, result) => {
-    //     if (err) {
-    //         console.log(err.message);
-    //         return res.status(500).send(err.message);
-    //     }
-
-    //     console.log('Users retrieved successfully');
-
-    //     res.status(200).send(result);
-    // });
 
 
-
-// Add Bus
+// ===============================
+// ADD BUS
+// ===============================
 
 const addBus = async (req, res) => {
     try {
@@ -101,107 +79,210 @@ const addBus = async (req, res) => {
             available_seats
         });
 
-        console.log("Bus inserted successfully");
-
         res.status(201).send({
             message: "Bus added successfully",
             data: bus
         });
 
     } catch (err) {
+
         console.log(err.message);
 
         res.status(500).send({
             message: "Error adding bus",
             error: err.message
         });
+
     }
 };
-   
-
-    // const query = `
-    //     INSERT INTO buses
-    //     (bus_name, bus_number, available_seats)
-    //     VALUES (?, ?, ?)
-    // `;
-
-    // db.execute(
-    //     query,
-    //     [bus_name, bus_number, available_seats],
-    //     (err, result) => {
-
-    //         if (err) {
-    //             console.log(err.message);
-    //             return res.status(500).send(err.message);
-    //         }
-
-    //         console.log('Bus inserted successfully');
-
-    //         res.status(201).send({
-    //             message: 'Bus added successfully',
-    //             id: result.insertId
-    //         });
-    //     }
-    // );
 
 
-
-// Get Buses With More Than Given Seats
-
-
+// ===============================
+// GET AVAILABLE BUSES
+// ===============================
 
 const getAvailableBuses = async (req, res) => {
     try {
 
-        const { seats } = req.params;
-
-        const { Op } = require("sequelize");
+        const seats = Number(req.params.seats);
 
         const buses = await Bus.findAll({
             where: {
                 available_seats: {
-                    [Op.gt]: Number(seats)
+                    [require("sequelize").Op.gte]: seats
                 }
             }
         });
 
-        console.log("Available buses retrieved successfully");
-
-        res.status(200).send(buses);
+        res.status(200).send({
+            message: "Available buses fetched successfully",
+            data: buses
+        });
 
     } catch (err) {
-        console.log(err.message);
 
         res.status(500).send({
-            message: "Error retrieving available buses",
+            message: "Error fetching available buses",
             error: err.message
         });
+
     }
 };
 
-    // const query = `
-    //     SELECT *
-    //     FROM buses
-    //     WHERE available_seats > ?
-    // `;
 
-    // db.execute(query, [seats], (err, result) => {
+// ===============================
+// CREATE BOOKING
+// ===============================
 
-    //     if (err) {
-    //         console.log(err.message);
-    //         return res.status(500).send(err.message);
-    //     }
+const createBooking = async (req, res) => {
+    try {
 
-    //     console.log('Available buses retrieved successfully');
+        const {
+            user_id,
+            bus_id,
+            seats_booked
+        } = req.body;
 
-    //     res.status(200).send(result);
-    // });
+        // Check user
+        const user = await Users.findByPk(user_id);
 
+        if (!user) {
+            return res.status(404).send({
+                message: "User not found"
+            });
+        }
+
+        // Check bus
+        const bus = await Bus.findByPk(bus_id);
+
+        if (!bus) {
+            return res.status(404).send({
+                message: "Bus not found"
+            });
+        }
+
+        // Check available seats
+        if (bus.available_seats < seats_booked) {
+            return res.status(400).send({
+                message: "Not enough seats available"
+            });
+        }
+
+        // Create booking
+        const booking = await Booking.create({
+            user_id,
+            bus_id,
+            seats_booked
+        });
+
+        // Reduce available seats
+        await bus.update({
+            available_seats: bus.available_seats - seats_booked
+        });
+
+        res.status(201).send({
+            message: "Booking created successfully",
+            data: booking
+        });
+
+    } catch (err) {
+
+        console.log(err.message);
+
+        res.status(500).send({
+            message: "Error creating booking",
+            error: err.message
+        });
+
+    }
+};
+
+
+// ===============================
+// GET BOOKINGS FOR USER
+// ===============================
+
+const getUserBookings = async (req, res) => {
+    try {
+
+        const userId = req.params.id;
+
+        const bookings = await Booking.findAll({
+            where: {
+                user_id: userId
+            },
+
+            include: [
+                {
+                    model: Bus
+                }
+            ]
+        });
+
+        res.status(200).send({
+            message: "User bookings fetched successfully",
+            data: bookings
+        });
+
+    } catch (err) {
+
+        console.log(err.message);
+
+        res.status(500).send({
+            message: "Error fetching user bookings",
+            error: err.message
+        });
+
+    }
+};
+
+
+// ===============================
+// GET BOOKINGS FOR BUS
+// ===============================
+
+const getBusBookings = async (req, res) => {
+    try {
+
+        const busId = req.params.id;
+
+        const bookings = await Booking.findAll({
+            where: {
+                bus_id: busId
+            },
+
+            include: [
+                {
+                    model: Users,
+                    attributes: ["id", "name", "email"]
+                }
+            ]
+        });
+
+        res.status(200).send({
+            message: "Bus bookings fetched successfully",
+            data: bookings
+        });
+
+    } catch (err) {
+
+        console.log(err.message);
+
+        res.status(500).send({
+            message: "Error fetching bus bookings",
+            error: err.message
+        });
+
+    }
+};
 
 
 module.exports = {
     addUser,
     getUsers,
     addBus,
-    getAvailableBuses
+    getAvailableBuses,
+    createBooking,
+    getUserBookings,
+    getBusBookings
 };
